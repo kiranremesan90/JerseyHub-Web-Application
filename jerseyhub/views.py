@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from .models import Product
 from django.http import HttpResponse
 
 def about(request):
@@ -16,10 +17,12 @@ def index(request):
 
 
 def product(request):
-    return render(request,'product.html')
+    products = Product.objects.all()
+    return render(request,'product.html',{'products':products})
 
-def productdetail(request):
-    return render(request,'product-detail.html')
+
+
+
 
 def shoppingcart(request):
     return render(request,'shoping-cart.html')
@@ -82,6 +85,12 @@ def user_login(request):
             messages.error(request,"Invalid username or password")
             return redirect('login')
     return render(request,'login.html')
+
+from django.shortcuts import render, get_object_or_404
+
+def product_detail(request, id):
+    product=get_object_or_404(Product, id=id)
+    return render(request, 'product-detail.html', {'product': product})
 
     
 

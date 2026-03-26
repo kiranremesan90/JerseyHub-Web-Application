@@ -7,10 +7,10 @@ urlpatterns=[
     path('contact/',views.contact,name='contact'),
     path('index/',views.index,name='index'),
     path('login/',views.user_login,name='login'),
-    path('productdetail/',views.productdetail,name='productdetail'),
     path('product/',views.product,name='product'),
     path('shopingcart/',views.shoppingcart,name='shopingcart'),
-    path('register/',views.register,name='register')
+    path('register/',views.register,name='register'),
+    path('product/<int:id>/',views.product_detail,name='product_detail')
     
 
 
