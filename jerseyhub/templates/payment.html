@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Order Payment</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+<div class="max-w-4xl mx-auto py-10 px-4">
+
+    <h1 class="text-4xl font-bold text-center text-gray-800 mb-10">Order Summary</h1>
+
+    <div class="grid md:grid-cols-2 gap-6">
+
+        <!-- Shipping Details -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-700">Shipping Details</h2>
+
+            <p class="mb-2"><strong class="text-gray-600">Name:</strong> {{ order.full_name }}</p>
+            <p class="mb-2"><strong class="text-gray-600">Phone:</strong> {{ order.phone }}</p>
+            <p class="mb-2"><strong class="text-gray-600">Address:</strong> {{ order.address }}</p>
+            <p class="mb-2"><strong class="text-gray-600">City:</strong> {{ order.city }}</p>
+            <p class="mb-2"><strong class="text-gray-600">Pincode:</strong> {{ order.pincode }}</p>
+        </div>
+
+        <!-- Order Items -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 flex flex-col justify-between">
+            <div>
+                <h2 class="text-2xl font-semibold mb-6 text-gray-700">Items</h2>
+
+                {% for item in order_items %}
+                <div class="flex justify-between mb-3 border-b pb-2">
+                    <span class="text-gray-700">{{ item.product.name }} (x{{ item.quantity }})</span>
+                    <span class="text-gray-700 font-medium">₹{{ item.price }}</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-500">No items found</p>
+                {% endfor %}
+
+                <!-- Delivery -->
+                <div class="flex justify-between mt-4 font-medium">
+                    <span>Delivery</span>
+                    <span>₹50</span>
+                </div>
+
+                <hr class="my-4 border-gray-300">
+
+                <!-- Grand Total -->
+                <div class="flex justify-between font-bold text-xl text-gray-800">
+                    <span>Grand Total</span>
+                    <span>₹{{ order.total_amount }}</span>
+                </div>
+            </div>
+
+            <!-- Pay Now Button -->
+            <button id="pay-btn"
+                class="mt-6 w-full bg-green-600 text-white py-3 rounded-xl font-semibold text-lg hover:bg-green-700 transition duration-300">
+                Pay Now
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Hidden Form for Razorpay -->
+<form id="payment-form" method="POST" action="{% url 'payment_success' %}">
+    {% csrf_token %}
+    <input type="hidden" name="razorpay_order_id" value="{{ order.razorpay_order_id }}">
+    <input type="hidden" name="razorpay_payment_id" id="payment_id">
+    <input type="hidden" name="razorpay_signature" id="signature">
+</form>
+
+<script>
+var options = {
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ amount }}",
+    "currency": "INR",
+    "name": "My Store",
+    "description": "Order Payment",
+    "order_id": "{{ order.razorpay_order_id }}",
+
+    "handler": function (response){
+        document.getElementById('payment_id').value = response.razorpay_payment_id;
+        document.getElementById('signature').value = response.razorpay_signature;
+        document.getElementById('payment-form').submit();
+    },
+
+    "prefill": {
+        "name": "{{ order.full_name }}",
+        "contact": "{{ order.phone }}"
+    },
+
+    "theme": {
+        "color": "#16a34a"
+    }
+};
+
+var rzp = new Razorpay(options);
+document.getElementById('pay-btn').onclick = function(e){
+    rzp.open();
+    e.preventDefault();
+}
+</script>
+
+</body>
+</html>

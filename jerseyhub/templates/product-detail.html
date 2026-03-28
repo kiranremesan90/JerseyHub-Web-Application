@@ -127,15 +127,15 @@ body {
 <div class="navbar-custom">
     <div class="logo">
         <a href="{% url 'index' %}">
-            <img src="{% static 'images/skinauralogo.jpg' %}">
+            <img src="{% static 'images/icons/logo1.png' %}">
         </a>
     </div>
 
     <div>
         <a href="{% url 'index' %}">Home</a>
         <a href="{% url 'product' %}">Shop</a>
-        <a href="{% url 'shopingcart' %}">Cart</a>
-        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'cart' %}">Cart</a>
+        {% comment %} <a href="{% url 'logout' %}">Logout</a> {% endcomment %}
     </div>
 </div>
 
@@ -149,11 +149,12 @@ body {
     <div class="product-details">
         <h2 class="product-title">{{ product.name }}</h2>
 
-        <p class="product-price">$ {{ product.price }}</p>
+        <p class="product-price">₹ {{ product.price }}</p>
 
         <p class="product-description">{{ product.description }}</p>
 
-        <form method="POST" action="#">
+        <!-- FORM -->
+        <form method="POST" action="{% url 'add_to_cart' product.id %}">
             {% csrf_token %}
 
             <div class="quantity-box">
@@ -162,13 +163,22 @@ body {
             </div>
 
             <div class="button-group">
-                <button type="submit" class="btn-cart">Add to Cart</button>
 
-                <button type="submit" formaction="#" class="btn-buy">
-                    Buy Now
+                <!-- ADD TO CART -->
+                <button type="submit" class="btn-cart">
+                    Add to Cart
                 </button>
+
+                <!-- BUY NOW -->
+                {% comment %} <button type="submit"
+                        formaction="{% url 'buy_now' product.id %}"
+                        class="btn-buy">
+                    Buy Now
+                </button> {% endcomment %}
+
             </div>
         </form>
+
     </div>
 
 </div>

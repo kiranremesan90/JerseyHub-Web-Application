@@ -1,9 +1,11 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>E-commerce Checkout</title>
+<title>Checkout</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -12,6 +14,9 @@
 <div class="max-w-6xl mx-auto p-6">
 
 <h1 class="text-3xl font-bold mb-6 text-center">Checkout</h1>
+
+<form method="POST">
+{% csrf_token %}
 
 <div class="grid md:grid-cols-3 gap-6">
 
@@ -22,15 +27,15 @@
 
 <div class="grid md:grid-cols-2 gap-4">
 
-<input class="border p-3 rounded-lg" placeholder="Full Name">
-<input class="border p-3 rounded-lg" placeholder="Phone Number">
+<input name="full_name" class="border p-3 rounded-lg" placeholder="Full Name" required>
+<input name="phone" class="border p-3 rounded-lg" placeholder="Phone Number" required>
 
-<input class="border p-3 rounded-lg col-span-2" placeholder="Email">
+<input name="email" class="border p-3 rounded-lg col-span-2" placeholder="Email">
 
-<input class="border p-3 rounded-lg col-span-2" placeholder="Address">
+<input name="address" class="border p-3 rounded-lg col-span-2" placeholder="Address" required>
 
-<input class="border p-3 rounded-lg" placeholder="City">
-<input class="border p-3 rounded-lg" placeholder="Pincode">
+<input name="city" class="border p-3 rounded-lg" placeholder="City" required>
+<input name="pincode" class="border p-3 rounded-lg" placeholder="Pincode" required>
 
 </div>
 
@@ -40,45 +45,19 @@
 <div class="space-y-3">
 
 <label class="flex items-center gap-3">
-<input type="radio" name="payment" onclick="showPayment('upi')" checked>
-UPI Payment
+<input type="radio" name="payment" value="razorpay" checked>
+Online Payment (UPI/Card)
 </label>
 
 <label class="flex items-center gap-3">
-<input type="radio" name="payment" onclick="showPayment('card')">
-Debit / Credit Card
-</label>
-
-<label class="flex items-center gap-3">
-<input type="radio" name="payment" onclick="showPayment('cod')">
+<input type="radio" name="payment" value="cod">
 Cash on Delivery
 </label>
 
 </div>
 
-<!-- UPI -->
-<div id="upi" class="mt-4">
-<input class="border p-3 rounded-lg w-full" placeholder="Enter UPI ID (example@upi)">
-</div>
-
-<!-- Card -->
-<div id="card" class="mt-4 hidden space-y-3">
-
-<input class="border p-3 rounded-lg w-full" placeholder="Card Number">
-
-<div class="grid grid-cols-2 gap-3">
-<input class="border p-3 rounded-lg" placeholder="MM/YY">
-<input class="border p-3 rounded-lg" placeholder="CVV">
-</div>
-
-</div>
-
-<!-- COD -->
-<div id="cod" class="mt-4 hidden text-green-600 font-medium">
-Pay with cash when the product is delivered.
-</div>
-
-<button class="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition">
+<button type="submit"
+class="mt-6 w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition">
 Place Order
 </button>
 
@@ -91,26 +70,25 @@ Place Order
 
 <div class="space-y-3">
 
+{% for item in cart_items %}
 <div class="flex justify-between">
-<span>T-Shirt</span>
-<span>₹799</span>
+<span>{{ item.product.name }} (x{{ item.quantity }})</span>
+<span>₹{{ item.product.price|floatformat:2 }}</span>
 </div>
+{% endfor %}
 
-<div class="flex justify-between">
-<span>Shoes</span>
-<span>₹1499</span>
-</div>
-
+<!-- Delivery Charge -->
 <div class="flex justify-between">
 <span>Delivery</span>
-<span>₹50</span>
+<span>₹{{ delivery_charge|default:50 }}</span>
 </div>
 
 <hr>
 
+<!-- Grand Total including delivery -->
 <div class="flex justify-between font-bold text-lg">
 <span>Total</span>
-<span>₹2348</span>
+<span>₹{{ total|add:delivery_charge|default:total|floatformat:2 }}</span>
 </div>
 
 </div>
@@ -119,17 +97,9 @@ Place Order
 
 </div>
 
+</form>
+
 </div>
-
-<script>
-function showPayment(type) {
-document.getElementById('upi').classList.add('hidden');
-document.getElementById('card').classList.add('hidden');
-document.getElementById('cod').classList.add('hidden');
-
-document.getElementById(type).classList.remove('hidden');
-}
-</script>
 
 </body>
 </html>
